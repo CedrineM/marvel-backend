@@ -1,12 +1,12 @@
 //import des packages requis
 const express = require("express");
 const cors = require("cors");
-// const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
 require("dotenv").config();
 
-// //connection à la base de donnée
-// mongoose.connect(process.env.MONGODB_URI);
+//connection à la base de donnée
+mongoose.connect(process.env.MONGODB_URI);
 
 //création du serveur express
 const app = express();
@@ -21,6 +21,9 @@ app.use(routerCharacters);
 
 const routerComics = require("./routes/comics.js");
 app.use(routerComics);
+
+const routerUser = require("./routes/user.js");
+app.use(routerUser);
 
 //route d'acceuil
 app.get("/", (req, res) => {
