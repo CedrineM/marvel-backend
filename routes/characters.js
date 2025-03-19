@@ -35,5 +35,27 @@ router.get("/characters", async (req, res) => {
   }
 });
 
+//route de récupération d'un personnage avec sont ID
+router.get("/character/:characterId", async (req, res) => {
+  try {
+    const { characterId } = req.params;
+    if (!characterId) {
+      throw {
+        message: "an ID must be given",
+        status: 400,
+      };
+    }
+    const response = await axios.get(
+      `https://lereacteur-marvel-api.herokuapp.com/character/${characterId}?apiKey=${process.env.MARVEL_API_SECRET}`
+    );
+    return res.status(200).json(response.data);
+  } catch (error) {
+    console.error;
+    return res
+      .status(error.status || 500)
+      .json({ message: error.message || "Internal server Error" });
+  }
+});
+
 //export des routes
 module.exports = router;
