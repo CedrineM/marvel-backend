@@ -7,31 +7,35 @@ const axios = require("axios");
 //route de récupération des personnages avec possibilité de recherche
 router.get("/characters", async (req, res) => {
   try {
-    const { name, skip, limit } = req.query;
+    const { name, page, limit } = req.query;
     let urlCharacters = `https://lereacteur-marvel-api.herokuapp.com/characters?apiKey=${process.env.MARVEL_API_SECRET}`;
     if (name) {
       urlCharacters += `&name=${name}`;
     }
-    if (skip) {
-      urlCharacters += `&skip=${skip}`;
-    }
+
     if (limit) {
       if (limit > 0 && limit <= 100) {
         urlCharacters += `&limit=${limit}`;
+      } else {
+        throw {
+          message: "the limit must be a number between 0 and 100",
+          status: 400,
+        };
       }
-      throw {
-        message: "the limit must be a number between 0 and 100",
-        status: 400,
-      };
+    }
+
+    if (page) {
+      const skip = (page - 1) * (limit || 100);
+      urlCharacters += `&skip=${skip}`;
+      console.log(skip);
     }
 
     const response = await axios.get(urlCharacters);
     return res.status(200).json(response.data);
   } catch (error) {
-    console.error;
-    return res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server Error" });
+    return res.status(error.response || error.status || 500).json({
+      message: error.response || error.message || "Internal server Error",
+    });
   }
 });
 
@@ -50,10 +54,9 @@ router.get("/character/:characterId", async (req, res) => {
     );
     return res.status(200).json(response.data);
   } catch (error) {
-    console.error;
-    return res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server Error" });
+    return res.status(error.response.status || error.status || 500).json({
+      message: error.response || error.message || "Internal server Error",
+    });
   }
 });
 

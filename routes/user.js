@@ -4,7 +4,6 @@ const router = express.Router();
 const uid2 = require("uid2");
 const SHA256 = require("crypto-js/sha256");
 const encBase64 = require("crypto-js/enc-base64");
-const mongoose = require("mongoose");
 
 //importation des modèles requis
 const User = require("../models/User");
@@ -13,7 +12,7 @@ const User = require("../models/User");
 //route pour creer un compte utilisateur (sign up)
 router.post("/user/signup", async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
 
     if (!req.body.username) {
       throw { message: "You must enter a username ", status: 400 };
@@ -39,7 +38,7 @@ router.post("/user/signup", async (req, res) => {
       salt: newSalt,
     });
 
-    console.log(newUser);
+    // console.log(newUser);
     await newUser.save();
 
     return res.status(201).json({
@@ -48,17 +47,16 @@ router.post("/user/signup", async (req, res) => {
       username: newUser.username,
     });
   } catch (error) {
-    console.error;
-    return res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server Error" });
+    return res.status(error.status || 500).json({
+      message: error.message || "Internal server Error",
+    });
   }
 });
 
 //route pour se connecter à un compte utilisateur (log in)
 router.post("/user/login", async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     const user = await User.findOne({ email: req.body.email });
     //Est ce que les informations communiquer sont correct
     if (!user) {
@@ -80,14 +78,16 @@ router.post("/user/login", async (req, res) => {
       username: user.username,
     });
   } catch (error) {
-    console.error;
-    return res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server Error" });
+    return res.status(error.status || 500).json({
+      message: error.message || "Internal server Error",
+    });
   }
 });
+
 //Read
+
 //Update
+
 //Delete
 
 //Exportation des routes

@@ -25,6 +25,9 @@ app.use(routerComics);
 const routerUser = require("./routes/user.js");
 app.use(routerUser);
 
+const routerFavorite = require("./routes/favorite.js");
+app.use(routerFavorite);
+
 //route d'acceuil
 app.get("/", (req, res) => {
   try {

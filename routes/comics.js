@@ -7,31 +7,33 @@ const axios = require("axios");
 //route de récupération des comics avec possibilité de recherche
 router.get("/comics", async (req, res) => {
   try {
-    const { title, skip, limit } = req.query;
+    const { title, page, limit } = req.query;
     let urlComics = `https://lereacteur-marvel-api.herokuapp.com/comics?apiKey=${process.env.MARVEL_API_SECRET}`;
     if (title) {
       urlComics += `&title=${title}`;
     }
-    if (skip) {
-      urlComics += `&skip=${skip}`;
-    }
+
     if (limit) {
       if (limit > 0 && limit <= 100) {
         urlComics += `&limit=${limit}`;
+      } else {
+        throw {
+          message: "the limit must be a number between 0 and 100",
+          status: 400,
+        };
       }
-      throw {
-        message: "the limit must be a number between 0 and 100",
-        status: 400,
-      };
+    }
+    if (page) {
+      const skip = (page - 1) * (limit || 100);
+      urlComics += `&skip=${skip}`;
     }
 
     const response = await axios.get(urlComics);
     return res.status(200).json(response.data);
   } catch (error) {
-    console.error;
-    return res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server Error" });
+    return res.status(error.response || error.status || 500).json({
+      message: error.response || error.message || "Internal server Error",
+    });
   }
 });
 
@@ -50,10 +52,9 @@ router.get("/comic/:comicId", async (req, res) => {
     );
     return res.status(200).json(response.data);
   } catch (error) {
-    console.error;
-    return res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server Error" });
+    return res.status(error.response.status || error.status || 500).json({
+      message: error.response || error.message || "Internal server Error",
+    });
   }
 });
 
@@ -72,10 +73,9 @@ router.get("/comics/:characterId", async (req, res) => {
     );
     return res.status(200).json(response.data);
   } catch (error) {
-    console.error;
-    return res
-      .status(error.status || 500)
-      .json({ message: error.message || "Internal server Error" });
+    return res.status(error.response.status || error.status || 500).json({
+      message: error.response || error.message || "Internal server Error",
+    });
   }
 });
 
