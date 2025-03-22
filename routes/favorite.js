@@ -1,36 +1,55 @@
-//import des packages requis
+//import des packages et middlewares requis
 const express = require("express");
-const router = express.Router();
-const authenticated = require("../middlewares/authenticated");
-const mongoose = require("mongoose");
+
+const authenticated = require("../middlewares/authenticated"); // recupère id utilisateur dans req.id
 
 //importation des models
-const User = require("../models/User");
 const Favorite = require("../models/Favorite");
 
-//Create
-//route pour creer un favori (authentification requise)
+//utilisation de Router
+const router = express.Router();
+
+//Create/ Delete
+//POST ==> route pour enregistrer ou supprimer un favori(authentification requise)
 router.post("/favorite", authenticated, async (req, res) => {
   try {
-    const { itemId, type } = req.body;
-    if (!itemId || !type) {
+    const { item, type } = req.body;
+    if (!item || !type) {
       throw {
         message:
           "You will need to provide the item ID and type to be able to add it to your favorites.",
         status: 400,
       };
     }
-
-    const newFavorite = new Favorite({
-      userId: req.id,
-      type: type, // Type du favori
-      itemId: itemId, // ID de l'élément à mettre en favorie
+    // recherche si le favori existe pour l'utilisateur
+    const existingFavorite = await Favorite.findOne({
+      item: item,
+      user: req.id,
     });
 
-    await newFavorite.save();
-    res
-      .status(201)
-      .json({ message: `This ${type} has been added to your favorites` });
+    // si le favori existe alors suppression de la liste des favoris
+    if (existingFavorite) {
+      await Favorite.findByIdAndDelete(existingFavorite._id);
+      return res.status(200).json({
+        message: `this ${existingFavorite.type} has been removed from favorites`,
+        object: existingFavorite,
+      });
+    }
+
+    // si le favori n'existe pas alors ajoute à la liste des favoris
+    else {
+      const newFavorite = new Favorite({
+        user: req.id,
+        type: type, // Type du favori
+        item: item, // l'élément à mettre en favorie
+      });
+
+      await newFavorite.save();
+      return res.status(201).json({
+        message: `This ${type} has been added to your favorites`,
+        object: newFavorite,
+      });
+    }
   } catch (error) {
     return res.status(error.status || 500).json({
       message: error.message || "Internal server Error",
@@ -39,10 +58,10 @@ router.post("/favorite", authenticated, async (req, res) => {
 });
 
 //Read
-//Route qui permet de récupérer les favoris d'un utilisateur
+//GET ==> Route qui permet de récupérer les favoris d'un utilisateur
 router.get("/favorites", authenticated, async (req, res) => {
   try {
-    const favoriteFound = await Favorite.find({ userId: req.id });
+    const favoriteFound = await Favorite.find({ user: req.id });
 
     res.status(201).json(favoriteFound);
   } catch (error) {

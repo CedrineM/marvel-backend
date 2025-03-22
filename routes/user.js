@@ -9,7 +9,7 @@ const encBase64 = require("crypto-js/enc-base64");
 const User = require("../models/User");
 
 //Create
-//route pour creer un compte utilisateur (sign up)
+//POST ==> route pour creer un compte utilisateur (sign up)
 router.post("/user/signup", async (req, res) => {
   try {
     // console.log(req.body);
@@ -18,7 +18,7 @@ router.post("/user/signup", async (req, res) => {
       throw { message: "You must enter a username ", status: 400 };
     }
     if (await User.findOne({ email: req.body.email })) {
-      throw { message: "This account already exists", status: 400 };
+      throw { message: "This account already exists", status: 409 };
     }
 
     //génération d'un salt
@@ -53,7 +53,7 @@ router.post("/user/signup", async (req, res) => {
   }
 });
 
-//route pour se connecter à un compte utilisateur (log in)
+//POST ==> route pour se connecter à un compte utilisateur (log in)
 router.post("/user/login", async (req, res) => {
   try {
     // console.log(req.body);
