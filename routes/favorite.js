@@ -63,7 +63,7 @@ router.get("/favorites", authenticated, async (req, res) => {
   try {
     const favoriteFound = await Favorite.find({ user: req.id });
 
-    return res.status(201).json(favoriteFound);
+    return res.status(200).json(favoriteFound);
   } catch (error) {
     return res.status(error.status || 500).json({
       message: error.message || "Internal server Error",
